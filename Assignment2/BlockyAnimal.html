@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Draw a point (1)</title>
+</head>
+
+<body onload="main()">
+	<div>
+		<canvas id="webgl" width="400" height="400">
+			Please use a browser that supports "canvas"
+		</canvas>
+		<p id="numdot"> XXX </p>
+	</div>
+
+	Body X: <input type="range" id="bodyZSlide" min="-1.0" max="1.0" value="0" step="0.0001" />
+	<p id="bodyZVal">0.0</p>
+	<div>
+		Hands: <input type="range" id="magentaSlide" min="0" max="90" value="0" />
+		Animation:
+		<button type="button" , id="animationMagentaOnButton">On</button>
+		<button type="button" , id="animationMagentaOffButton">Off</button>
+	</div>
+	<div>
+		Arms: <input type="range" id="yellowSlide" min="0" max="90" value="0" />
+		Animation:
+		<button type="button" , id="animationYellowOnButton">On</button>
+		<button type="button" , id="animationYellowOffButton">Off</button>
+	</div>
+
+	<div>
+		Legs: <input type="range" id="legsSlide" min="-90" max="90" value="0" />
+		Animation:
+		<button type="button" , id="legsAnimationOnButton">On</button>
+		<button type="button" , id="legsAnimationOffButton">Off</button>
+	</div>
+	<div>
+		Legs X: <input type="range" id="legsXSlide" min="-90" max="90" value="0" />
+		Animation:
+		<button type="button" , id="legsXAnimationOnButton">On</button>
+		<button type="button" , id="legsXAnimationOffButton">Off</button>
+	</div>
+	<div>
+		Lower legs: <input type="range" id="lowerLegsSlide" min="0" max="90" value="0" />
+		Animation:
+		<button type="button" , id="lowerLegsAnimationOnButton">On</button>
+		<button type="button" , id="lowerLegsAnimationOffButton">Off</button>
+	</div>
+
+	<div>
+		wave Animation: <input type="range" id="waveSlide" min="0" max="1" value="0" step="0.0000001" />
+		Animation:
+		<button type="button" , id="waveAnimationOnButton">On</button>
+		<button type="button" , id="waveAnimationOffButton">Off</button>
+	</div>
+
+	<script src="../lib/webgl-utils.js"></script>
+	<script src="../lib/webgl-debug.js"></script>
+	<script src="../lib/cuon-utils.js"></script>
+	<script src="../lib/cuon-matrix.js"></script>
+	<script src="Circle.js"></script>
+	<script src="Cylinder.js"></script>
+	<script src="Cube.js"></script>
+	<script src="Point.js"></script>
+	<script src="Triangle.js"></script>
+	<script src="BlockyAnimal.js"></script>
+</body>
+
+</html>
