@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Parcel Sandbox</title>
+	<meta charset="UTF-8" />
+</head>
+
+<body>
+	<div class="container">
+		<canvas id="webgl"></canvas>
+		<div id="overlay">
+			<p id="numdot">XXX</p>
+		</div>
+	</div>
+
+	<script type="module" src="./World.js">
+	</script>
+</body>
+
+<style>
+	.container {
+		position: relative;
+	}
+
+	#overlay {
+		position: absolute;
+		left: 10px;
+		top: 10px;
+	}
+
+	body {
+		margin: 0;
+	}
+</style>
+
+</html>
