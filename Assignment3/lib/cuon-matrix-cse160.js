@@ -20,6 +20,24 @@ class Vector3 {
 	}
 
 	/**
+		* @param {Vector3} other 
+		*/
+	equal(other) {
+		assert(other != null, "Other is null");
+		assert(other != undefined, "Other is undefined");
+		assert(other.elements != null, "Other.elements is null");
+		assert(other.elements != undefined, "Other.elements undefined");
+		assert(other.elements.length == 3, "Other.elements is not the correct length");
+		for (let i = 0; i < 3; i++) {
+			if (this.elements[i] != other.elements[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Copy vector.
 	 * @param src source vector
 	 * @return this
@@ -153,6 +171,18 @@ class Vector3 {
 
 		// Don't delete the return statement.
 		return this;
+	}
+
+	/**
+		* @returns {Vector3}
+		*/
+	floor() {
+		let out = new Vector3(this.elements);
+		for (let i = 0; i < 3; i++) {
+			out.elements[i] = Math.floor(out.elements[i]);
+		}
+
+		return out;
 	}
 }
 

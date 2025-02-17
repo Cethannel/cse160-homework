@@ -10,7 +10,7 @@ export default class Camera {
 		this.projectionMatrix = new Matrix4();
 		this.up = new Vector3([0, 1, 0]);
 		this.fov = 60;
-		this.speed = 1;
+		this.speed = 0.01;
 		this.rotateAngle = 1;
 
 		this.aspect = window.innerWidth / window.innerHeight;
@@ -44,39 +44,39 @@ export default class Camera {
 		return f;
 	}
 
-	moveForward() {
+	moveForward(dt) {
 		let f = this.calculateForward();
 		f.normalize();
-		f.mul(this.speed);
+		f.mul(this.speed * dt);
 
 		this.eye.add(f);
 		this.at.add(f);
 	}
 
-	moveBackwards() {
+	moveBackwards(dt) {
 		let f = this.calculateForward();
 		f.normalize();
-		f.mul(this.speed);
+		f.mul(this.speed * dt);
 
 		this.eye.sub(f);
 		this.at.sub(f);
 	}
 
-	moveLeft() {
+	moveLeft(dt) {
 		const f = this.calculateForward();
 		let s = Vector3.cross(this.up, f);
 		s.normalize();
-		s.mul(this.speed);
+		s.mul(this.speed * dt);
 
 		this.eye.add(s);
 		this.at.add(s);
 	}
 
-	moveRight() {
+	moveRight(dt) {
 		const f = this.calculateForward();
 		let s = Vector3.cross(this.up, f);
 		s.normalize();
-		s.mul(this.speed);
+		s.mul(this.speed * dt);
 
 		this.eye.sub(s);
 		this.at.sub(s);
@@ -114,5 +114,43 @@ export default class Camera {
 		f_prime.add(this.eye);
 
 		this.at = f_prime;
+	}
+
+	/**
+		* @param {number} angle
+		*/
+	panAngle(angle) {
+		const f = this.calculateForward();
+		f.normalize();
+		let rotationMatrix = new Matrix4();
+		if (rotationMatrix.elements.find((val, a, b) => Number.isNaN(val)) != undefined) {
+			throw "Found nan"
+		}
+		rotationMatrix.setRotate(angle, ...this.up.elements);
+		if (rotationMatrix.elements.find((val, a, b) => Number.isNaN(val)) != undefined) {
+			throw "Found nan"
+		}
+		let f_prime = rotationMatrix.multiplyVector3(f);
+		f_prime.add(this.eye);
+
+		this.at = f_prime;
+	}
+
+	moveUp(dt) {
+		let f = new Vector3(this.up.elements);
+		f.normalize();
+		f.mul(this.speed * dt);
+
+		this.eye.add(f);
+		this.at.add(f);
+	}
+
+	moveDown(dt) {
+		let f = new Vector3(this.up.elements);
+		f.normalize();
+		f.mul(this.speed * dt);
+
+		this.eye.sub(f);
+		this.at.sub(f);
 	}
 }

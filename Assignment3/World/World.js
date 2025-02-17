@@ -46,7 +46,6 @@ const FSHADER_SOURCE = `
   }
   `;
 
-
 /** @type{HTMLCanvasElement} */
 let canvas = undefined;
 /** @type{WebGLRenderingContext} */
@@ -81,16 +80,6 @@ function setupWebGL() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 }
 
-let g_mousePos = {
-	x: 0,
-	y: 0,
-}
-
-let g_prevMousePos = {
-	x: 0,
-	y: 0,
-}
-
 function connectVariablesToGLSL() {
 	// Initialize shaders
 	if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
@@ -99,40 +88,112 @@ function connectVariablesToGLSL() {
 	}
 }
 
+let pointerLocked = false;
+
+let sensitivity = 10;
+
+let moveDirs = {
+	x: 0,
+	y: 0,
+	z: 0,
+}
+
+let selectedBlockID = 0;
+
 function hookupInputs() {
 	// Register function (event handler) to be called on a mouse press
 	canvas.onmousemove = function(ev) {
-		const normal_x = ev.x / canvas.width - 0.5;
-		const normal_y = ev.y / canvas.height - 0.5;
-		if (ev.buttons == 1) {
-			g_mousePos.x += g_prevMousePos.x - normal_x;
-			g_mousePos.y += g_prevMousePos.y - normal_y;
+		if (pointerLocked) {
+			camera.panAngle(ev.movementX / canvas.width * -360 * sensitivity)
 		}
-		g_prevMousePos.x = normal_x;
-		g_prevMousePos.y = normal_y;
 	};
 
-	canvas.onclick = function(ev) {
-		if (ev.shiftKey) {
-			g_poke.angle = 0;
-			g_poke.animation = true;
+	canvas.onmousedown = function(ev) {
+		if (pointerLocked) {
+			const pos = camera.at.floor();
+			console.log("Button: ", ev.button)
+			switch (ev.button) {
+				case 0:
+					cubes = cubes.filter((block) => !block.position.equal(pos));
+					break;
+				case 2:
+					console.log("Adding block ");
+					let c = new Cube();
+					c.setUvs(selectedBlockID, textures.numtextures)
+					c.translate(pos);
+					cubes.push(c);
+					break;
+			}
+		} else {
+			canvas.requestPointerLock({
+				unadjustedMovement: true,
+			});
 		}
 	}
 
-	window.onkeydown = (ev) => {
-		console.log("Got key down", ev.key)
+	document.addEventListener("pointerlockchange", () => {
+		if (document.pointerLockElement === canvas) {
+			console.log("The pointer lock status is now locked");
+			pointerLocked = true;
+		} else {
+			console.log("The pointer lock status is now unlocked");
+			pointerLocked = false;
+		}
+	}, false);
+
+	window.onkeyup = async (ev) => {
 		switch (ev.key) {
 			case "w":
-				camera.moveForward();
+				moveDirs.x = 0;
 				break;
 			case "a":
-				camera.moveLeft();
+				moveDirs.z = 0;
 				break;
 			case "s":
-				camera.moveBackwards();
+				moveDirs.x = 0;
 				break;
 			case "d":
-				camera.moveRight();
+				moveDirs.z = 0;
+				break;
+			case " ":
+				moveDirs.y = 0;
+				break;
+			case "Shift":
+				moveDirs.y = 0;
+				break;
+		}
+	}
+
+	/**
+		* @param {KeyboardEvent} ev
+		*/
+	window.onkeydown = async (ev) => {
+		if (ev.key > "0" && ev.key < "9") {
+			selectedBlockID = ev.key[0] - '0' - 1;
+			for (let i = 0; i < 9; i++) {
+				let hotbarItem = document.getElementById("hotbar" + i);
+				if (hotbarItem == null) continue;
+
+				hotbarItem.style.borderStyle = "none";
+			}
+			let hotbarItem = document.getElementById("hotbar" + selectedBlockID);
+			if (hotbarItem == null) return;
+
+			hotbarItem.style.borderStyle = "solid";
+		}
+		console.log("Key:", ev.key);
+		switch (ev.key) {
+			case "w":
+				moveDirs.x = + 1;
+				break;
+			case "a":
+				moveDirs.z = - 1;
+				break;
+			case "s":
+				moveDirs.x = - 1;
+				break;
+			case "d":
+				moveDirs.z = + 1;
 				break;
 			case "q":
 				camera.panLeft();
@@ -140,8 +201,13 @@ function hookupInputs() {
 			case "e":
 				camera.panRight();
 				break;
+			case " ":
+				moveDirs.y = 1;
+				break;
+			case "Shift":
+				moveDirs.y = -1;
+				break;
 		}
-		camera.calculateViewProjection();
 	}
 }
 
@@ -160,6 +226,7 @@ function genWorld() {
 			for (let h = 0; h < map[i][j]; h++) {
 				let c = new Cube();
 				c.translate(new Vector3([i, h, j]));
+				c.setUvs(0, textures.numtextures);
 				cubes.push(c);
 			}
 		}
@@ -178,7 +245,7 @@ function genWorld() {
 	staticCubes.push(sky);
 }
 
-export function main() {
+async function main() {
 	console.log("running main");
 
 	setupWebGL();
@@ -189,7 +256,7 @@ export function main() {
 
 	textures = new Textures(gl);
 
-	textures.loadAtlast(gl, "../assets/textures/atlas.png");
+	await textures.loadAtlast(gl, "../assets/textures/atlas.png");
 
 	// Specify the color for clearing <canvas>
 	gl.clearColor(1.0, 0.0, 0.0, 1.0);
@@ -208,10 +275,35 @@ let g_startTime = performance.now() / 1000.0;
 let g_seconds = performance.now() / 1000.0 - g_startTime;
 let g_lastSeconds = g_seconds;
 
+let g_lastTime = performance.now();
+
 function tick() {
+	let now = performance.now();
+	let dt = now - g_lastTime;
+	g_lastTime = now;
+	camera.calculateViewProjection();
 	g_lastSeconds = g_seconds;
 	g_seconds = performance.now() / 1000.0 - g_startTime;
 	var startTime = performance.now();
+
+	if (moveDirs.x > 0) {
+		camera.moveForward(dt);
+	} else if (moveDirs.x < 0) {
+		camera.moveBackwards(dt);
+	}
+
+	if (moveDirs.z > 0) {
+		camera.moveRight(dt);
+	} else if (moveDirs.z < 0) {
+		camera.moveLeft(dt);
+	}
+
+
+	if (moveDirs.y > 0) {
+		camera.moveUp(dt);
+	} else if (moveDirs.y < 0) {
+		camera.moveDown(dt);
+	}
 
 	updateAnimationAnlges();
 
@@ -242,12 +334,10 @@ function renderAllShapes() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	for (let i = 0; i < cubes.length; i++) {
-		cubes[i].setUvs(1, textures.numtextures);
 		cubes[i].render(gl, camera);
 	}
 
 	for (let i = 0; i < staticCubes.length; i++) {
-		staticCubes[i].setUvs(1, textures.numtextures);
 		staticCubes[i].render(gl, camera);
 	}
 

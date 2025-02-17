@@ -7,10 +7,14 @@
 </head>
 
 <body>
+	<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 	<div class="container">
 		<canvas id="webgl"></canvas>
 		<div id="overlay">
 			<p id="numdot">XXX</p>
+		</div>
+		<div id="hotbar">
+			<p hx-get="/textures.html" hx-trigger="load" />
 		</div>
 	</div>
 
@@ -27,6 +31,23 @@
 		position: absolute;
 		left: 10px;
 		top: 10px;
+	}
+
+	#hotbar {
+		display: flex;
+		justify-content: space-around;
+		width: 100vw;
+		position: absolute;
+		left: auto;
+		right: auto;
+		top: auto;
+		bottom: 10px;
+	}
+
+	#hotbar>* {
+		border-width: 5px;
+		border-style: none;
+		border-color: gray;
 	}
 
 	body {

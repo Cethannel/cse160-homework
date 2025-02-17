@@ -126,6 +126,7 @@ export default class Cube {
 		* @param {number} textureCount 
 		*/
 	setUvs(textureIndex = 0, textureCount = 1) {
+		console.log(`Creating uvs with index: ${textureIndex} and count: ${textureCount}`);
 		// prettier-ignore
 		this.uvs = new Float32Array([
 			// FRONT
@@ -143,7 +144,7 @@ export default class Cube {
 		]);
 		const offset = textureIndex / textureCount;
 
-		for (let i = 1; i < this.uvs.length - 1; i += 2) {
+		for (let i = 1; i < this.uvs.length; i += 2) {
 			this.uvs[i] = this.uvs[i] / textureCount + offset;
 		}
 	}

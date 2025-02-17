@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,7 +12,8 @@ import (
 func main() {
 	textures := []string{
 		"dirt.png",
-		"grass_top.png",
+		"cobblestone.png",
+		"planks_oak.png",
 	}
 
 	atlas := image.NewRGBA(image.Rect(0, 0, 32, len(textures)*32))
@@ -50,7 +52,18 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.Static("/", "./")
+	router.GET("/textures.html", func(ctx *gin.Context) {
+		out := ""
+
+		for i, texture := range textures {
+			out += `<img src="` + "../assets/textures/" + texture + `" id="hotbar` + strconv.Itoa(i) + `"/>`
+		}
+
+		ctx.Data(200, "text/html", []byte(out))
+	})
+	router.Static("/assets", "./assets")
+	router.Static("/World", "./World")
+	router.Static("/lib", "./lib")
 
 	// Listen and serve on 0.0.0.0:8080
 	router.Run(":8080")
