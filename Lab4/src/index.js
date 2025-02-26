@@ -53,25 +53,26 @@ console.log(thing);
 var gl = getContext();
 
 if (!initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER))
-  console.error("Could not init shaders");
+	console.error("Could not init shaders");
 
 const camera = new Camera([0, 1, 5], [0, 1, 0]);
+//camera.position.elements[1] = 15;
 const controls = new Controls(gl, camera);
 
-const floor = new Plane();
+const floor = new Plane(10, 10);
 floor.scale.mul(100); // make it 100x100 units
 floor.rotation.elements[0] = -90; // make it horizontal
 
 const ball = new Sphere(50, 20, 20); // radius 50, 20x20 resolution
 
 function tick() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  floor.render(gl, camera);
-  ball.render(gl, camera);
-  controls.update();
+	floor.render(gl, camera);
+	ball.render(gl, camera);
+	controls.update();
 
-  requestAnimationFrame(tick);
+	requestAnimationFrame(tick);
 }
 
 tick();
