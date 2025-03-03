@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Parcel Sandbox</title>
+	<meta charset="UTF-8" />
+</head>
+
+<body>
+	<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+	<div class="container">
+		<canvas id="webgl"></canvas>
+		<div id="overlay">
+			<p id="numdot">XXX</p>
+		</div>
+		<div id="hotbar">
+			<p hx-get="/textures.html" hx-trigger="load" />
+		</div>
+	</div>
+
+	<div>
+		Light X:
+		<input id="lightX" type="range" min="0" max="10" step="0.0001"></input>
+	</div>
+	<div>
+		Light Y:
+		<input id="lightY" type="range" min="0" max="10" step="0.0001"></input>
+	</div>
+	<div>
+		Light Z:
+		<input id="lightZ" type="range" min="0" max="10" step="0.0001"></input>
+	</div>
+	<div>
+		Enable lighting:
+		<input id="lightEnable" type="checkbox"></input>
+	</div>
+
+	<script type="module" src="./World.js">
+	</script>
+</body>
+
+<style>
+	canvas {
+		width: 20em;
+		height: 20em;
+	}
+
+	.container {
+		position: relative;
+	}
+
+	#overlay {
+		position: absolute;
+		left: 10px;
+		top: 10px;
+	}
+
+	#hotbar {
+		display: flex;
+		justify-content: space-around;
+		width: 100vw;
+		position: absolute;
+		left: auto;
+		right: auto;
+		top: auto;
+		bottom: 10px;
+	}
+
+	#hotbar>* {
+		border-width: 5px;
+		border-style: none;
+		border-color: gray;
+	}
+
+	body {
+		margin: 0;
+	}
+</style>
+
+</html>
