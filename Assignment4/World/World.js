@@ -46,6 +46,10 @@ const FSHADER_SOURCE = `
 	uniform bool uEnableSpecular;
 	uniform bool uLightOn;
 
+	uniform vec3 uSpotLightPos;
+	uniform vec3 uSpotLightDirection;
+	uniform float uSpotLightLimit;
+
   varying vec2 vUv;
   varying vec4 vColor;
   varying vec3 vNormal;
@@ -78,11 +82,26 @@ const FSHADER_SOURCE = `
 
 		vec3 diffuse = vec3(gl_FragColor) * nDotL;
 		vec3 ambient = vec3(gl_FragColor) * 0.3;
+
+		// Spotlight code from: https://math.hws.edu/graphicsbook/c7/s2.html#webgl3d.2.6
+		float spotFactor = 1.0;  // multiplier to account for spotlight
+		L = normalize(uSpotLightPos - vec3(vVertPos));
+		vec3 D = -normalize(uSpotLightDirection);
+		float spotCosine = dot(D,L);
+		if (spotCosine >= uSpotLightLimit) { 
+				spotFactor = pow(spotCosine,10.0);
+		}
+		else { // The point is outside the cone of light from the spotlight.
+				spotFactor = 0.0; // The light will add no color to the point.
+		}
+
+		vec3 spotColor = vec3(gl_FragColor) * spotFactor * 0.3;
+
 		if (uLightOn) {
 			if (uEnableSpecular) {
-				gl_FragColor = vec4(diffuse + ambient + specular, 1.0);
+				gl_FragColor = vec4((diffuse + ambient + specular + spotColor), 1.0);
 			} else {
-				gl_FragColor = vec4(diffuse + ambient, 1.0);
+				gl_FragColor = vec4(diffuse + ambient + spotColor, 1.0);
 			}
 		}
   }
@@ -111,6 +130,11 @@ let lightCube = new Cube();
 lightCube.position = lightPos;
 lightCube.scale = new Vector3([0.1, 0.1, 0.1]);
 lightCube.setColor(1.0, 1.0, 1.0);
+
+let spotLightPos = new Vector3([6.0, 8.0, 6.0]);
+let spotLightDirection = new Vector3([0.0, 0.0, 0.0]).sub(spotLightPos);
+console.log("Spotlight dir: ", spotLightDirection)
+let spotLightAngle = 30.0;
 
 let lightOn = true;
 
@@ -403,9 +427,28 @@ function tick() {
 
 	lightCube.position = lightPos;
 
+	function bindUniformf3(variable, name) {
+		const uniform = gl.getUniformLocation(gl.program, name)
+		if (uniform != -1) {
+			gl.uniform3f(uniform, ...variable.elements);
+		} else {
+			console.error("Could not find " + name)
+		}
+	}
+
 	const uLightPos = gl.getUniformLocation(gl.program, "uLightPos")
 	if (uLightPos != -1) {
 		gl.uniform3f(uLightPos, ...lightPos.elements);
+	} else {
+		console.error("Could not find lightPos")
+	}
+
+	bindUniformf3(spotLightPos, "uSpotLightPos");
+	bindUniformf3(spotLightDirection, "uSpotLightDirection");
+
+	const uSpotLightAngle = gl.getUniformLocation(gl.program, "uSpotLightLimit")
+	if (uSpotLightAngle != -1) {
+		gl.uniform1f(uSpotLightAngle, Math.cos(spotLightAngle / 180 * Math.PI));
 	} else {
 		console.error("Could not find lightPos")
 	}
