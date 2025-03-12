@@ -51,6 +51,24 @@ func main() {
 		panic(err)
 	}
 
+	go func() {
+		out := ""
+
+		for i, texture := range textures {
+			out += `<img src="` + "../assets/textures/" + texture + `" id="hotbar` + strconv.Itoa(i) + `"/>`
+		}
+
+		texturesFile, err := os.Create("assets/textures.html")
+		defer texturesFile.Close()
+		if err != nil {
+			panic(err)
+		}
+		_, err = texturesFile.WriteString(out)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
 	router := gin.Default()
 	router.GET("/textures.html", func(ctx *gin.Context) {
 		out := ""
